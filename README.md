@@ -26,5 +26,5 @@ flutter pub get
 10. Everything is set! You can try the project
 
 ### Project support
-- Flutter version: 3.22.2 - Chanel: Stable
+- Flutter version: 3.22.2 - channel: Stable
 - Chrome/Android Emulator
