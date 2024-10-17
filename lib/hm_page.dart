@@ -1,21 +1,3 @@
-/*
-- start date x DateUtil.oneYearBefore(DateTime.now())
-- end date x DateTime.now()
-- dataset => List(Model(DateTime,int))
-- textColor x hardcoded
-- default color 
-- block size x hardcoded
-- font size x hardcoded
-- color set x 
-- color mode x based on opacity
-- onClick
-- margin x hardcoded
-- border radius x hardcoded
-- show text
-- color tip helper
-- scrollable = should be scrollable
- */
-
 import 'dart:developer' as dev;
 import 'dart:math';
 
