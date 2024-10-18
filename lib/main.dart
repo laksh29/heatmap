@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:scapia/dataset.dart';
 import 'package:scapia/hm_page.dart';
+import 'package:scapia/transaction_model.dart';
 
 void main() {
   runApp(const MyApp());
@@ -26,13 +28,25 @@ class HeatmapScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<TransactionModel> getData() {
+      List<TransactionModel> data = [];
+
+      for (var x in transactionDummy) {
+        data.add(TransactionModel.fromMap(x));
+      }
+
+      return data;
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Spending Heatmap"),
       ),
-      body: const SingleChildScrollView(
-        padding: EdgeInsets.all(12.0),
-        child: Heatmap(),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(12.0),
+        child: Heatmap(
+          datasets: getData(),
+        ),
       ),
     );
   }

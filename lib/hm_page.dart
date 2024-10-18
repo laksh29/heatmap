@@ -2,11 +2,16 @@ import 'dart:developer' as dev;
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:scapia/transaction_model.dart';
 import 'package:scapia/utils/date.dart';
 import 'package:scapia/utils/extensions.dart';
 
 class Heatmap extends StatelessWidget {
-  const Heatmap({super.key});
+  const Heatmap({
+    super.key,
+    this.datasets,
+  });
+  final List<TransactionModel>? datasets;
 
   @override
   Widget build(BuildContext context) {
@@ -14,10 +19,12 @@ class Heatmap extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         // scrollable heat map
-        const SingleChildScrollView(
+        SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           // reverse: true,
-          child: HmComponent(),
+          child: HmComponent(
+            datasets: datasets,
+          ),
         ),
 
         20.whitespaceHeight,
@@ -72,10 +79,11 @@ class ColorToolTip extends StatelessWidget {
   // this method generates a List of 3 containers changing their color based on opacity
   List<Widget> _colorContainer() {
     List<Widget> children = [];
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 7; i++) {
       children.add(
         HmBox(
-          boxColor: defaultColor?.withOpacity(i / 3),
+          boxDimension: 15.0,
+          boxColor: defaultColor?.withOpacity(i / 7),
         ),
       );
     }
@@ -85,14 +93,31 @@ class ColorToolTip extends StatelessWidget {
 
 // I have wrapped the MapContainer over MapContainer because, the boxColor depends on the opacity, and if we have a color bg, the color of the box will not be as expected
 class HmBox extends StatelessWidget {
-  const HmBox({super.key, this.boxColor});
+  const HmBox({
+    super.key,
+    this.boxColor,
+    this.showBorder = false,
+    this.boxDimension,
+    this.onTap,
+  });
   final Color? boxColor;
+  final bool showBorder;
+  final double? boxDimension;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return MapContainer(
-      boxColor: Colors.white,
-      child: MapContainer(boxColor: boxColor),
+    return InkWell(
+      onTap: onTap,
+      child: MapContainer(
+        boxDimension: boxDimension,
+        boxColor: Colors.transparent,
+        showBorder: showBorder,
+        child: MapContainer(
+          boxDimension: boxDimension,
+          boxColor: boxColor,
+        ),
+      ),
     );
   }
 }
@@ -103,19 +128,26 @@ class MapContainer extends StatelessWidget {
     super.key,
     required this.boxColor,
     this.child,
+    this.showBorder = false,
+    this.boxDimension,
   });
 
   final Color? boxColor;
   final Widget? child;
+  final bool showBorder;
+  final double? boxDimension;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 20,
-      height: 20,
+      width: boxDimension ?? 20.0,
+      height: boxDimension ?? 20.0,
       decoration: BoxDecoration(
         color: boxColor ?? Colors.white,
         borderRadius: BorderRadius.circular(2.0),
+        border: showBorder
+            ? Border.all(color: Colors.black.withOpacity(0.1))
+            : null,
       ),
       child: child,
     );
@@ -123,7 +155,8 @@ class MapContainer extends StatelessWidget {
 }
 
 class HmComponent extends StatelessWidget {
-  const HmComponent({super.key});
+  const HmComponent({super.key, required this.datasets});
+  final List<TransactionModel>? datasets;
 
   @override
   Widget build(BuildContext context) {
@@ -137,11 +170,22 @@ class HmComponent extends StatelessWidget {
       List<Widget> children = [];
 
       for (int i = 0 - (startDate.weekday % 7); i <= dateDif; i += 7) {
-        DateTime firstDay = CustomDateUtils().changeDay(startDate, i);
+        DateTime firstDay = CustomDateUtils.changeDay(startDate, i);
 
         children.add(
           HmCol(
             numDays: min(endDate.difference(firstDay).inDays, 7),
+            datasets: datasets,
+            startDate: firstDay,
+            endDate: endDate,
+            defaultColor: Colors.orange,
+            onTap: (p0) => showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                      title: Text(
+                        CustomDateUtils.getDate(p0),
+                      ),
+                    )),
           ),
         );
 
@@ -153,6 +197,7 @@ class HmComponent extends StatelessWidget {
     }
 
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         // week labels
         const WeekLabels(),
@@ -188,7 +233,6 @@ class WeekLabels extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (var week in CustomDateUtils.week)
@@ -211,28 +255,92 @@ class HmCol extends StatelessWidget {
   const HmCol({
     super.key,
     required this.numDays,
+    this.datasets,
+    required this.startDate,
+    required this.endDate,
+    this.defaultColor = Colors.orange,
+    this.onTap,
   });
+
   final int numDays;
+  final List<TransactionModel>? datasets;
+  final DateTime startDate;
+  final DateTime endDate;
+  final Color defaultColor;
+  final Function(DateTime)? onTap;
 
   @override
   Widget build(BuildContext context) {
+    double findMaxValue(Map<DateTime, double> dailyTotals) {
+      return dailyTotals.isNotEmpty
+          ? dailyTotals.values.reduce((a, b) => a > b ? a : b)
+          : 1.0;
+    }
+
+    Map<DateTime, double> aggregateTransactions() {
+      Map<DateTime, double> dailyTotals = {};
+
+      for (var transaction in datasets!) {
+        DateTime day = DateTime(transaction.transactionAt.year,
+            transaction.transactionAt.month, transaction.transactionAt.day);
+
+        if (dailyTotals.containsKey(day)) {
+          dailyTotals[day] = dailyTotals[day]! + transaction.amount;
+        } else {
+          dailyTotals[day] = transaction.amount;
+        }
+      }
+
+      return dailyTotals;
+    }
+
     List<Widget> dayBox() {
-      List<Widget> col = List.generate(numDays, (index) => const HmBox());
-      return col.addSeparator(5.whitespaceHeight);
+      final aggregateData = aggregateTransactions();
+      final maxValue = findMaxValue(aggregateData);
+
+      dev.log("end date : ${endDate.toString()}");
+
+      return List.generate(
+        numDays,
+        (index) {
+          bool hasData = aggregateData.keys.contains(DateTime(startDate.year,
+              startDate.month, startDate.day - startDate.weekday % 7 + index));
+
+          double dailyTotal = aggregateData[DateTime(
+                  startDate.year,
+                  startDate.month,
+                  startDate.day + index - (startDate.weekday % 7))] ??
+              1;
+
+          // dev.log(hasData
+          //     ? "${CustomDateUtils.changeDay(startDate, index)} - $dailyTotal"
+          //     : "no data");
+
+          return HmBox(
+            onTap: () {
+              onTap != null
+                  ? onTap!(CustomDateUtils.changeDay(startDate, index + 1))
+                  : null;
+            },
+            showBorder: true,
+            boxColor: hasData
+                ? defaultColor.withOpacity(dailyTotal / maxValue)
+                : defaultColor.withOpacity(0),
+          );
+        },
+      ).addSeparator(5.whitespaceHeight);
     }
 
     List emptyBox() {
-      List emptySpace = (numDays != 7)
+      return (numDays != 7)
           ? List.generate(
               7 - numDays,
               (index) => const SizedBox(
                 height: 20,
                 width: 20,
               ),
-            )
+            ).addSeparator(5.whitespaceHeight)
           : [];
-
-      return emptySpace;
     }
 
     return Column(
@@ -313,7 +421,10 @@ TODO: following
 2. box sizes 
 3. all paddings and margins
 4. all texts
-5. create a dataset
-6. add colors to respective boxes
-7. onTap show a dialog box with details
+5. create a dataset - done
+6. add colors to respective boxes - done
+7. onTap show a dialog box with details - partial done
+
+---
+generate the aggregated date in HmComponent and pass it to the HmCol, so that the aggregated value can be used in the dialog box
  */
