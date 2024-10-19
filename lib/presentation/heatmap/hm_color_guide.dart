@@ -1,6 +1,6 @@
 // color guide indicating the colors used in the heatmap
 import 'package:flutter/material.dart';
-import 'package:scapia/presentation/hm_box.dart';
+import 'package:scapia/presentation/heatmap/hm_box.dart';
 import 'package:scapia/utils/extensions.dart';
 
 class ColorToolTip extends StatelessWidget {

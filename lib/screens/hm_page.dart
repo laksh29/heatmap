@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:scapia/presentation/hm_color_guide.dart';
-import 'package:scapia/presentation/hm_component.dart';
-import 'package:scapia/presentation/week_month_labels.dart';
-import 'package:scapia/transaction_model.dart';
+import 'package:scapia/models/transaction_model.dart';
+import 'package:scapia/presentation/heatmap/hm_color_guide.dart';
+import 'package:scapia/presentation/heatmap/hm_component.dart';
+import 'package:scapia/presentation/heatmap/week_month_labels.dart';
 import 'package:scapia/utils/extensions.dart';
 
 // the main component that needs to be used. and where the data needs to be passed
 class Heatmap extends StatelessWidget {
   const Heatmap({
     super.key,
-    this.datasets,
+    required this.datasets,
   });
-  final List<TransactionModel>? datasets;
+  final List<TransactionModel> datasets;
 
   @override
   Widget build(BuildContext context) {

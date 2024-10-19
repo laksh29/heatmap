@@ -2,9 +2,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:scapia/presentation/hm_column.dart';
-import 'package:scapia/presentation/week_month_labels.dart';
-import 'package:scapia/transaction_model.dart';
+import 'package:scapia/models/transaction_model.dart';
+import 'package:scapia/presentation/heatmap/hm_column.dart';
+import 'package:scapia/presentation/heatmap/week_month_labels.dart';
 import 'package:scapia/utils/date.dart';
 import 'package:scapia/utils/extensions.dart';
 

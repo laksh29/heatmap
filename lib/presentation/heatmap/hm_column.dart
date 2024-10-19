@@ -1,6 +1,6 @@
 // single columns in the heatmap representing the week
 import 'package:flutter/material.dart';
-import 'package:scapia/presentation/hm_box.dart';
+import 'package:scapia/presentation/heatmap/hm_box.dart';
 import 'package:scapia/utils/date.dart';
 import 'package:scapia/utils/extensions.dart';
 
