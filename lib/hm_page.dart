@@ -19,14 +19,25 @@ class Heatmap extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         // scrollable heat map
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          // reverse: true,
-          child: HmComponent(
-            datasets: datasets,
-          ),
-        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            // weeks label
+            const WeekLabels(),
+            10.whitespaceWidth,
 
+            // scrollable heat map - only the blocks are scrollable to ensure that at any point the weeks are visible and easy to track
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                reverse: true,
+                child: HmComponent(
+                  datasets: datasets,
+                ),
+              ),
+            ),
+          ],
+        ),
         20.whitespaceHeight,
 
         // color guide
