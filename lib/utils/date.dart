@@ -1,12 +1,12 @@
 class CustomDateUtils {
   static const List<String> week = [
+    'Sun',
     'Mon',
     'Tue',
     'Wed',
     'Thu',
     'Fri',
     'Sat',
-    'Sun',
   ];
 
   static const List<String> month = [
@@ -23,6 +23,26 @@ class CustomDateUtils {
     'Nov',
     'Dec',
   ];
+  static String monthShort(int month) {
+    // List of abbreviated month names
+    const List<String> monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ];
+
+    // Return the month name based on the month number
+    return monthNames[month - 1]; // Month number starts from 1
+  }
 
   // get a date exactly one year before based on the referenceDate
   DateTime oneYearBefore(final DateTime referenceDate) =>
@@ -41,11 +61,19 @@ class CustomDateUtils {
   static DateTime endDayOfMonth(final DateTime referenceDate) =>
       DateTime(referenceDate.year, referenceDate.month + 1, 0);
 
-  static String getDate(DateTime currentDate) {
+  static String getReadableDate(DateTime currentDate) {
     final year = currentDate.year;
     final month = currentDate.month;
     final day = currentDate.day;
 
     return "$day/$month/$year";
+  }
+
+  static DateTime getDate(DateTime currentDate) {
+    final year = currentDate.year;
+    final month = currentDate.month;
+    final day = currentDate.day;
+
+    return DateTime(year, month, day);
   }
 }

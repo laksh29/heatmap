@@ -166,32 +166,59 @@ class HmComponent extends StatelessWidget {
 
     final List<int> firstDayOfMonth = [];
 
+    Map<DateTime, double> getAggregateData() {
+      Map<DateTime, double> dailyTotals = {};
+
+      for (var transaction in datasets!) {
+        DateTime day = DateTime(transaction.transactionAt.year,
+            transaction.transactionAt.month, transaction.transactionAt.day);
+
+        if (dailyTotals.containsKey(day)) {
+          dailyTotals[day] = dailyTotals[day]! + transaction.amount;
+        } else {
+          dailyTotals[day] = transaction.amount;
+        }
+      }
+
+      return dailyTotals;
+    }
+
+    double findMaxValue(Map<DateTime, double> dailyTotals) {
+      return dailyTotals.isNotEmpty
+          ? dailyTotals.values.reduce((a, b) => a > b ? a : b)
+          : 1.0;
+    }
+
     List<Widget> hmGrid() {
       List<Widget> children = [];
+
+      final Map<DateTime, double> data = getAggregateData();
+      final double maxValue = findMaxValue(data);
 
       for (int i = 0 - (startDate.weekday % 7); i <= dateDif; i += 7) {
         DateTime firstDay = CustomDateUtils.changeDay(startDate, i);
 
         children.add(
           HmCol(
-            numDays: min(endDate.difference(firstDay).inDays, 7),
-            datasets: datasets,
-            startDate: firstDay,
-            endDate: endDate,
-            defaultColor: Colors.orange,
-            onTap: (p0) => showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                      title: Text(
-                        CustomDateUtils.getDate(p0),
-                      ),
-                    )),
-          ),
+              numDays: min(endDate.difference(firstDay).inDays + 1, 7),
+              aggregateData: data,
+              maxValue: maxValue,
+              firstDate: firstDay,
+              endDate: endDate,
+              defaultColor: Colors.orange,
+              onTap: (p0) {
+                return showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                          title: Text(
+                            CustomDateUtils.getReadableDate(p0),
+                          ),
+                        ));
+              }),
         );
 
         firstDayOfMonth.add(firstDay.month);
       }
-      dev.log("first day of month: $firstDayOfMonth");
 
       return children;
     }
@@ -199,11 +226,6 @@ class HmComponent extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        // week labels
-        const WeekLabels(),
-
-        10.whitespaceWidth,
-
         // column for month label and the HM grid
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,75 +277,37 @@ class HmCol extends StatelessWidget {
   const HmCol({
     super.key,
     required this.numDays,
-    this.datasets,
-    required this.startDate,
+    required this.aggregateData,
+    required this.firstDate,
     required this.endDate,
+    required this.maxValue,
     this.defaultColor = Colors.orange,
     this.onTap,
   });
 
   final int numDays;
-  final List<TransactionModel>? datasets;
-  final DateTime startDate;
+  final Map<DateTime, double> aggregateData;
+  final DateTime firstDate;
   final DateTime endDate;
   final Color defaultColor;
   final Function(DateTime)? onTap;
+  final double maxValue;
 
   @override
   Widget build(BuildContext context) {
-    double findMaxValue(Map<DateTime, double> dailyTotals) {
-      return dailyTotals.isNotEmpty
-          ? dailyTotals.values.reduce((a, b) => a > b ? a : b)
-          : 1.0;
-    }
-
-    Map<DateTime, double> aggregateTransactions() {
-      Map<DateTime, double> dailyTotals = {};
-
-      for (var transaction in datasets!) {
-        DateTime day = DateTime(transaction.transactionAt.year,
-            transaction.transactionAt.month, transaction.transactionAt.day);
-
-        if (dailyTotals.containsKey(day)) {
-          dailyTotals[day] = dailyTotals[day]! + transaction.amount;
-        } else {
-          dailyTotals[day] = transaction.amount;
-        }
-      }
-
-      return dailyTotals;
-    }
-
     List<Widget> dayBox() {
-      final aggregateData = aggregateTransactions();
-      final maxValue = findMaxValue(aggregateData);
-
       dev.log("end date : ${endDate.toString()}");
 
       return List.generate(
         numDays,
         (index) {
-          bool hasData = aggregateData.keys.contains(DateTime(startDate.year,
-              startDate.month, startDate.day - startDate.weekday % 7 + index));
-
-          double dailyTotal = aggregateData[DateTime(
-                  startDate.year,
-                  startDate.month,
-                  startDate.day + index - (startDate.weekday % 7))] ??
-              1;
-
-          // dev.log(hasData
-          //     ? "${CustomDateUtils.changeDay(startDate, index)} - $dailyTotal"
-          //     : "no data");
+          DateTime currentDate = CustomDateUtils.changeDay(firstDate, index);
+          double dailyTotal = aggregateData[currentDate] ?? 1;
 
           return HmBox(
-            onTap: () {
-              onTap != null
-                  ? onTap!(CustomDateUtils.changeDay(startDate, index + 1))
-                  : null;
-            },
+            onTap: dailyTotal == 1 ? null : () => onTap?.call(currentDate),
             showBorder: true,
-            boxColor: hasData
+            boxColor: aggregateData.containsKey(currentDate)
                 ? defaultColor.withOpacity(dailyTotal / maxValue)
                 : defaultColor.withOpacity(0),
           );
@@ -414,17 +398,3 @@ class HmMonthText extends StatelessWidget {
     );
   }
 }
-
-/*
-TODO: following
-1. const colors
-2. box sizes 
-3. all paddings and margins
-4. all texts
-5. create a dataset - done
-6. add colors to respective boxes - done
-7. onTap show a dialog box with details - partial done
-
----
-generate the aggregated date in HmComponent and pass it to the HmCol, so that the aggregated value can be used in the dialog box
- */
