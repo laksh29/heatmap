@@ -8,8 +8,14 @@ class DataCubit extends Cubit<DataState> {
   DataCubit() : super(DataInitial());
 
   Future getData() async {
-    emit(DataLoading());
-    List<TransactionModel> data = await DataRepo().fetchData();
-    emit(DataSuccess(data: data));
+    try {
+      // fetching the data from the repo
+      emit(DataLoading());
+      List<TransactionModel> data = await DataRepo().fetchData();
+      emit(DataSuccess(data: data));
+    } catch (e) {
+      // in case of any error getting the data from the repo, emitting error state
+      emit(DataFailure(errorMsg: e.toString()));
+    }
   }
 }

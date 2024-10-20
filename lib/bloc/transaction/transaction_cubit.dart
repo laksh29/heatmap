@@ -33,7 +33,7 @@ class TransactionCubit extends Cubit<TransactionState> {
           double totalCredit = 0;
           double totalDebit = 0;
 
-          // loop over the filtered transactions to figure out total credit and total debit amounts
+          // looping over the filtered transactions to figure out total credit and total debit amounts
           for (var data in filteredData) {
             if (data.transactionType == TransactionType.credit) {
               totalCredit += data.amount;
