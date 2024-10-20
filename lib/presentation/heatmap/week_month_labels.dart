@@ -60,7 +60,7 @@ class HmMonthLabels extends StatelessWidget {
         // if given week is first week of the dataset or first week of the month, create a label
         if (label == 0 ||
             (label > 0 && firstDayInfos[label] != firstDayInfos[label - 1])) {
-          // check if the first [firstDayInfos] month < current month, then not displaying the month label
+          // check if the first [firstDayInfos] month < cuxrrent month, then not displaying the month label
           if ((!showYearly && firstDayInfos[label] < startDate.month)) {
             writeLabel = false;
           } else {
