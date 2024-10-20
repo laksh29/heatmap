@@ -10,8 +10,10 @@ class Heatmap extends StatelessWidget {
   const Heatmap({
     super.key,
     required this.datasets,
+    this.showYearly = false,
   });
   final List<TransactionModel> datasets;
+  final bool showYearly;
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +31,12 @@ class Heatmap extends StatelessWidget {
             // scrollable heat map - only the blocks are scrollable to ensure that at any point the weeks are visible and easy to track
             Expanded(
               child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
                 scrollDirection: Axis.horizontal,
                 reverse: true,
                 child: HmComponent(
                   datasets: datasets,
+                  showYearly: showYearly,
                 ),
               ),
             ),

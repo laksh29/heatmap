@@ -9,13 +9,20 @@ import 'package:scapia/utils/date.dart';
 import 'package:scapia/utils/extensions.dart';
 
 class HmComponent extends StatelessWidget {
-  const HmComponent({super.key, required this.datasets});
+  const HmComponent({
+    super.key,
+    required this.datasets,
+    this.showYearly = false,
+  });
   final List<TransactionModel>? datasets;
+  final bool showYearly;
 
   @override
   Widget build(BuildContext context) {
     final DateTime endDate = DateTime.now();
-    final DateTime startDate = CustomDateUtils().oneYearBefore(endDate);
+    final DateTime startDate = showYearly
+        ? CustomDateUtils().oneYearBefore(endDate)
+        : DateTime(endDate.year, endDate.month);
     final int dateDif = endDate.difference(startDate).inDays;
 
     final List<int> firstDayOfMonth = [];
@@ -89,7 +96,11 @@ class HmComponent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // month label
-        HmMonthLabels(firstDayInfos: firstDayOfMonth),
+        HmMonthLabels(
+          firstDayInfos: firstDayOfMonth,
+          startDate: startDate,
+          showYearly: showYearly,
+        ),
 
         10.whitespaceHeight,
 

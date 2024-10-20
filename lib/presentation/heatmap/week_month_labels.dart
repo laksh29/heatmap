@@ -34,8 +34,12 @@ class HmMonthLabels extends StatelessWidget {
   const HmMonthLabels({
     super.key,
     required this.firstDayInfos,
+    required this.startDate,
+    this.showYearly = false,
   });
   final List<int> firstDayInfos;
+  final DateTime startDate;
+  final bool showYearly;
 
   @override
   Widget build(BuildContext context) {
@@ -56,21 +60,26 @@ class HmMonthLabels extends StatelessWidget {
         // if given week is first week of the dataset or first week of the month, create a label
         if (label == 0 ||
             (label > 0 && firstDayInfos[label] != firstDayInfos[label - 1])) {
-          writeLabel = true;
+          // check if the first [firstDayInfos] month < current month, then not displaying the month label
+          if ((!showYearly && firstDayInfos[label] < startDate.month)) {
+            writeLabel = false;
+          } else {
+            writeLabel = true;
 
-          children.add(
-            firstDayInfos.length == 1 ||
-                    (label == 0 &&
-                        firstDayInfos[label] != firstDayInfos[label + 1])
-                ? textDisplay(CustomDateUtils.month[firstDayInfos[label] - 1])
-                : Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 2.0),
-                    width: (20 + 2) * 2,
-                    child: textDisplay(
-                      CustomDateUtils.month[firstDayInfos[label] - 1],
+            children.add(
+              firstDayInfos.length == 1 ||
+                      (label == 0 &&
+                          firstDayInfos[label] != firstDayInfos[label + 1])
+                  ? textDisplay(CustomDateUtils.month[firstDayInfos[label] - 1])
+                  : Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 2.0),
+                      width: (20 + 2) * 2,
+                      child: textDisplay(
+                        CustomDateUtils.month[firstDayInfos[label] - 1],
+                      ),
                     ),
-                  ),
-          );
+            );
+          }
         } else if (writeLabel) {
           // if the week is any other week than consisting of the first day, do not label
           writeLabel = false;
