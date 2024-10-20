@@ -58,7 +58,7 @@ flutter pub get
 
 ### Preview and APK
 
-Try the widget from here: [https://assignment-heatmap.netlify.app/](Website Link)
+Try the widget from here: [Website Link](https://assignment-heatmap.netlify.app/)
 
 https://github.com/user-attachments/assets/d91e1a36-5c26-40ce-835a-7e4e785ca242
 
