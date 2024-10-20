@@ -17,8 +17,8 @@ class TransactionModel {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'transactionType':
-          transactionType == TransactionType.credit ? 'credit' : 'debit',
+      'spendingType':
+          transactionType == TransactionType.credit ? 'Credit' : 'Debit',
       'amount': amount,
       'transactionAt': transactionAt.millisecondsSinceEpoch,
       'note': note,
@@ -27,7 +27,7 @@ class TransactionModel {
 
   factory TransactionModel.fromMap(Map<String, dynamic> map) {
     return TransactionModel(
-      transactionType: map['transaction_type'] == 'credit'
+      transactionType: map['spendingType'] == 'Credit'
           ? TransactionType.credit
           : TransactionType.debit,
       amount: map['amount'] as double,
