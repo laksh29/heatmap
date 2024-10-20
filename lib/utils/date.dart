@@ -76,4 +76,22 @@ class CustomDateUtils {
 
     return DateTime(year, month, day);
   }
+
+  static String getReadableTime(DateTime currentDate) {
+    int hour = currentDate.hour;
+    int minutes = currentDate.minute;
+    int seconds = currentDate.second;
+
+    String period = hour >= 12 ? 'PM' : 'AM';
+
+    hour = hour % 12;
+    if (hour == 0) {
+      // special case when time is 12 or 0 in 24 hour format
+      hour = 12;
+    }
+
+    String formattedMin = minutes.toString().padLeft(2, '0');
+
+    return "$hour:$formattedMin $period";
+  }
 }
