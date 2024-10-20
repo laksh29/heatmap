@@ -54,3 +54,12 @@ flutter pub get
 14. Refactored the dialog box to hold various information about the particular day
 15. Restructured the files
 16. TADAAAA!!! The task was accomplished!
+
+
+### Preview and APK
+
+Try the widget from here: 
+
+https://github.com/user-attachments/assets/d91e1a36-5c26-40ce-835a-7e4e785ca242
+
+
